@@ -1,31 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../index.css";
 
 function Dashboard() {
   const [saldo, setSaldo] = useState(0);
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
-
   const [transacoes, setTransacoes] = useState([]);
 
-  function adicionarTransacao(event) {
+  // Função para buscar os dados do Python (GET)
+  async function buscarTransacoes() {
+    try {
+      const resposta = await fetch("http://127.0.0.1:8000/transacoes");
+      const dados = await resposta.json();
+
+      setTransacoes(dados);
+
+      // Recalcula o saldo total somando tudo que veio do banco
+      const saldoCalculado = dados.reduce(
+        (acumulador, item) => acumulador + parseFloat(item.valor),
+        0,
+      );
+      setSaldo(saldoCalculado);
+    } catch (erro) {
+      console.error("Erro ao buscar transações:", erro);
+    }
+  }
+
+  // useEffect faz a busca rodar automaticamente quando a tela abre
+  useEffect(() => {
+    buscarTransacoes();
+  }, []);
+
+  // Função para enviar uma nova transação para o Python (POST)
+  async function adicionarTransacao(event) {
     event.preventDefault();
 
     const valorNumero = parseFloat(valor);
 
     if (!isNaN(valorNumero)) {
-      setSaldo(saldo + valorNumero);
-
       const novaTransacao = {
-        id: Math.random().toString(),
         descricao: descricao,
         valor: valorNumero,
       };
 
-      setTransacoes([novaTransacao, ...transacoes]);
+      try {
+        // Envia os dados para a API
+        await fetch("http://127.0.0.1:8000/transacoes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(novaTransacao),
+        });
 
-      setDescricao("");
-      setValor("");
+        // Limpa os campos da tela
+        setDescricao("");
+        setValor("");
+
+        // Pede para o React buscar a lista atualizada no banco
+        buscarTransacoes();
+      } catch (erro) {
+        console.error("Erro ao salvar transação:", erro);
+      }
     }
   }
 
@@ -33,16 +69,16 @@ function Dashboard() {
     <div className="container">
       <header>
         <h1>Meu App Financeiro</h1>
-        <p>Controle seu orçamento e construa patrimônio com FIIs.</p>
+        <p>Controle seu orçamento do dia a dia.</p>
       </header>
 
       <main>
         <section className="resumo">
           <h2>Resumo do Mês</h2>
-          <p>Saldo livre para investir: R$ {saldo.toFixed(2)}</p>
+          <p>Saldo livre: R$ {saldo.toFixed(2)}</p>
         </section>
 
-        <section>
+        <section className="formulario">
           <h3>Nova Movimentação</h3>
           <form onSubmit={adicionarTransacao}>
             <input
@@ -54,8 +90,8 @@ function Dashboard() {
             />
             <input
               type="number"
-              step={0.01}
-              placeholder="Valor (use sinal - para despesa"
+              step="0.01"
+              placeholder="Valor (use sinal - para despesa)"
               value={valor}
               onChange={(e) => setValor(e.target.value)}
               required
@@ -66,18 +102,22 @@ function Dashboard() {
 
         <section className="extrato">
           <h3>Extrato de Movimentações</h3>
-
           {transacoes.length === 0 ? (
-            <p>Nenhuma movimentação registrada ainda.</p>
+            <p className="vazio">Nenhuma movimentação registrada ainda.</p>
           ) : (
             <ul className="lista-transacoes">
+              {/* Agora o React lê as transações direto do banco de dados! */}
               {transacoes.map((t) => (
                 <li key={t.id} className="item-transacao">
                   <span className="desc">{t.descricao}</span>
                   <span
-                    className={t.valor >= 0 ? "valor receita" : "valor despesa"}
+                    className={
+                      parseFloat(t.valor) >= 0
+                        ? "valor receita"
+                        : "valor despesa"
+                    }
                   >
-                    R$ {t.valor.toFixed(2)}
+                    R$ {parseFloat(t.valor).toFixed(2)}
                   </span>
                 </li>
               ))}
