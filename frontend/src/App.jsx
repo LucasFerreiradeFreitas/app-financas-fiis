@@ -1,35 +1,92 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./index.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [saldo, setSaldo] = useState(0);
+  const [descricao, setDescricao] = useState("");
+  const [valor, setValor] = useState("");
+
+  const [transacoes, setTransacoes] = useState([]);
+
+  function adicionarTransacao(event) {
+    event.preventDefault();
+
+    const valorNumero = parseFloat(valor);
+
+    if (!isNaN(valorNumero)) {
+      setSaldo(saldo + valorNumero);
+
+      const novaTransacao = {
+        id: Math.random().toString(),
+        descricao: descricao,
+        valor: valorNumero,
+      };
+
+      setTransacoes([novaTransacao, ...transacoes]);
+
+      setDescricao("");
+      setValor("");
+    }
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="container">
+      <header>
+        <h1>Meu App Financeiro</h1>
+        <p>Controle seu orçamento e construa patrimônio com FIIs.</p>
+      </header>
+
+      <main>
+        <section className="resumo">
+          <h2>Resumo do Mês</h2>
+          <p>Saldo livre para investir: R$ {saldo.toFixed(2)}</p>
+        </section>
+
+        <section>
+          <h3>Nova Movimentação</h3>
+          <form onSubmit={adicionarTransacao}>
+            <input
+              type="text"
+              placeholder="Ex: Salário, Curso, etc."
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+              required
+            />
+            <input
+              type="number"
+              step={0.01}
+              placeholder="Valor (use sinal - para despesa"
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+              required
+            />
+            <button type="submit">Adicionar</button>
+          </form>
+        </section>
+
+        <section className="extrato">
+          <h3>Extrato de Movimentações</h3>
+
+          {transacoes.length === 0 ? (
+            <p>Nenhuma movimentação registrada ainda.</p>
+          ) : (
+            <ul className="lista-transacoes">
+              {transacoes.map((t) => (
+                <li key={t.id} className="item-transacao">
+                  <span className="desc">{t.descricao}</span>
+                  <span
+                    className={t.valor >= 0 ? "valor receita" : "valor despesa"}
+                  >
+                    R$ {t.valor.toFixed(2)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;

@@ -1,68 +1,170 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  background-color: #f0f2f5;
+  color: #333;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+header h1 {
+  color: #1a1a1a;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.resumo {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  padding: 35px;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(42, 82, 152, 0.2);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.resumo h2 {
+  font-size: 1.1rem;
+  font-weight: 400;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.resumo p {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.formulario {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.formulario h3 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+form {
+  display: flex;
+  gap: 15px;
+}
+
+input {
+  flex: 1;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2a5298;
+  box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
 }
 
 button {
+  padding: 15px 30px;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  font-weight: 600;
+  font-size: 1rem;
+  transition:
+    background-color 0.3s,
+    transform 0.1s;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:hover {
+  background-color: #1b5e20;
 }
+
+button:active {
+  transform: scale(0.98);
+}
+
+.extrato {
+  margin-top: 30px;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.extrato h3 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.vazio {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+.lista-transacoes {
+  list-style: none;
+}
+
+.item-transacao {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 0;
+  margin-bottom: 1px solid #f0f0f0;
+}
+
+.item-transacao:last-child {
+  border-bottom: none;
+}
+
+.item-transacao .desc {
+  font-weight: 600;
+  color: #555;
+}
+
+.item-transacao .valor {
+  font-weight: 700;
+}
+
+.receita {
+  color: #2e7d32;
+}
+
+.despesa {
+  color: #d32f2f;
+}
+
+
