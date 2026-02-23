@@ -167,4 +167,107 @@ button:active {
   color: #d32f2f;
 }
 
+.menu-navegacao {
+  background-color: #1a1a1a;
+  padding: 15px 0;
+  margin-bottom: 30px;
+}
 
+.menu-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.link-menu {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+}
+
+.link-menu:hover {
+  background-color: #333;
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.input-group label {
+  font-weight: bold;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.input-group.destaque input {
+  border-color: #2e7d32;
+  background-color: #f1f8e9;
+}
+
+.btn-container {
+  display: flex;
+  align-items: flex-end;
+}
+
+.btn-comprar {
+  width: 100%;
+  height: 50px;
+}
+
+.carteira-lista .resumo-carteira {
+  background-color: #f1f8e9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #2e7d32;
+  font-size: 1.2rem;
+  border: 1px solid #c5e1a5;
+}
+
+.fii-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fii-info,
+.fii-valores {
+  display: flex;
+  flex-direction: column;
+}
+
+.fii-info {
+  text-align: left;
+}
+
+.fii-valores {
+  text-align: right;
+}
+
+.fii-ticker {
+  font-size: 1.2rem;
+  color: #1e3c72;
+  font-weight: 700;
+}
+
+.fii-qtd,
+.fii-pm {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 4px;
+}
