@@ -1,64 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../index.css";
 
 function Fiis() {
   const [fii, setFii] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [preco, setPreco] = useState("");
-
-  // A memória agora guarda a sua Carteira inteira
   const [carteira, setCarteira] = useState([]);
 
-  function adicionarFii(event) {
-    event.preventDefault();
-
-    const qtdNum = parseInt(quantidade);
-    const precoNum = parseFloat(preco);
-    const fiiUpper = fii.toUpperCase();
-
-    if (qtdNum > 0 && precoNum > 0 && fiiUpper) {
-      // O app procura se esse FII já existe na sua lista
-      const fiiExistente = carteira.find((item) => item.ticker === fiiUpper);
-
-      if (fiiExistente) {
-        // Se já existe, atualiza as cotas e o Preço Médio
-        const novaCarteira = carteira.map((item) => {
-          if (item.ticker === fiiUpper) {
-            const novoTotalInvestido = item.totalInvestido + qtdNum * precoNum; 
-            const novaQuantidade = item.quantidade + qtdNum;
-            return {
-              ...item,
-              quantidade: novaQuantidade,
-              totalInvestido: novoTotalInvestido,
-              // O novo Preço Médio é o dinheiro total dividido pelo total de cotas
-              precoMedio: novoTotalInvestido / novaQuantidade,
-            };
-          }
-          return item;
-        });
-        setCarteira(novaCarteira);
-      } else {
-        // Se é a primeira vez comprando esse FII, adiciona na lista
-        const novoFii = {
-          id: Math.random().toString(),
-          ticker: fiiUpper,
-          quantidade: qtdNum,
-          precoMedio: precoNum,
-          totalInvestido: qtdNum * precoNum,
-        };
-        setCarteira([...carteira, novoFii]);
-      }
-
-      // Limpa o formulário para a próxima compra
-      setFii("");
-      setQuantidade("");
-      setPreco("");
+  // Busca a carteira salva no MySQL assim que a tela abre
+  async function buscarCarteira() {
+    try {
+      const resposta = await fetch("http://127.0.0.1:8000/carteira");
+      const dados = await resposta.json();
+      setCarteira(dados);
+    } catch (erro) {
+      console.error("Erro ao buscar carteira:", erro);
     }
   }
 
-  // Calcula o patrimônio total somando todos os FIIs da lista
+  useEffect(() => {
+    buscarCarteira();
+  }, []);
+
+  // Envia a nova compra para o Python
+  async function adicionarFii(event) {
+    event.preventDefault();
+
+    const novaCompra = {
+      ticker: fii,
+      quantidade: parseInt(quantidade),
+      preco: parseFloat(preco),
+    };
+
+    if (
+      novaCompra.quantidade > 0 &&
+      novaCompra.preco > 0 &&
+      novaCompra.ticker
+    ) {
+      try {
+        await fetch("http://127.0.0.1:8000/carteira", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(novaCompra),
+        });
+
+        // Limpa os campos
+        setFii("");
+        setQuantidade("");
+        setPreco("");
+
+        // Puxa a lista atualizada do banco
+        buscarCarteira();
+      } catch (erro) {
+        console.error("Erro ao salvar FII:", erro);
+      }
+    }
+  }
+
+  // Calcula o patrimônio total somando o que veio do banco
   const totalCarteira = carteira.reduce(
-    (acumulador, item) => acumulador + item.totalInvestido,
+    (acumulador, item) => acumulador + parseFloat(item.total_investido),
     0,
   );
 
@@ -140,10 +141,10 @@ function Fiis() {
                   </div>
                   <div className="fii-valores">
                     <span className="fii-pm">
-                      PM: R$ {item.precoMedio.toFixed(2)}
+                      PM: R$ {parseFloat(item.preco_medio).toFixed(2)}
                     </span>
                     <span className="valor receita">
-                      R$ {item.totalInvestido.toFixed(2)}
+                      R$ {parseFloat(item.total_investido).toFixed(2)}
                     </span>
                   </div>
                 </li>

@@ -65,3 +65,57 @@ def listar_transacoes():
     return resultados
   except Exception as e:
     raise HTTPException(status_code=500, detail=f"Erro ao buscar: {e}")
+  
+class CompraFii(BaseModel):
+    ticker: str
+    quantidade: int
+    preco: float
+
+@app.get("/carteira")
+def listar_carteira():
+  if not conexao_banco or not conexao_banco.is_connected():
+    raise HTTPException(status_code=500, detail="Banco desconectado")
+  
+  try:
+    cursor = conexao_banco.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM carteira ORDER BY total_investido DESC")
+    resultados = cursor.fetchall()
+    cursor.close()
+
+    return resultados
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Erro ao buscar carteira: {e}")
+
+@app.post("/carteira")
+def registrar_compra(compra: CompraFii):
+  if not conexao_banco or not conexao_banco.is_connected():
+    raise HTTPException(status_code=500, detail="Banco desconectado")
+  
+  try:
+    cursor = conexao_banco.cursor(dictionary=True)
+    ticker_upper = compra.ticker.upper()
+
+    cursor.execute("SELECT * FROM carteira WHERE ticker = %s", (ticker_upper,))
+    fii_existente = cursor.fetchone()
+
+    if fii_existente:
+      nova_qtd = fii_existente['quantidade'] + compra.quantidade
+      novo_total = float(fii_existente['total_investido']) + (compra.quantidade * compra.preco)
+      novo_pm = novo_total / nova_qtd
+
+      sql_update = "UPDATE carteira SET quantidade = %s, preco_medio = %s, total_investido = %s WHERE id = %s"
+      cursor.execute(sql_update, (nova_qtd, novo_pm, novo_total, fii_existente['id']))
+      mensagem = f"Sucesso! Posição de {ticker_upper} atualizada na carteira."
+    
+    else:
+      total = compra.quantidade * compra.preco
+      sql_insert = "INSERT INTO carteira (ticker, quantidade, preco_medio, total_investido) VALUES (%s, %s, %s, %s)"
+      cursor.execute(sql_insert, (ticker_upper, compra.quantidade, compra.preco, total))
+      mensagem = f"Sucesso! {ticker_upper} adicionado à carteira."
+    
+    conexao_banco.commit()
+    cursor.close()
+    return {"mensagem": mensagem}
+  
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Erro ao registrar compra: {e}")
