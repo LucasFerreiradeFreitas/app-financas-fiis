@@ -1,13 +1,17 @@
 import mysql.connector
 from mysql.connector import Error
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def obter_conexao():
   try:
     conexao = mysql.connector.connect(
-      host='localhost',
-      database='app_financas',
-      user='root',
-      password='Target96669542*'
+      host=os.getenv("DB_HOST"),
+      database=os.getenv("DB_NAME"),
+      user=os.getenv("DB_USER"),
+      password=os.getenv("DB_PASSWORD")
     )
 
     if conexao.is_connected():
