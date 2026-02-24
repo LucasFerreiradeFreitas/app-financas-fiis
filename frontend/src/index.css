@@ -271,3 +271,28 @@ button:active {
   color: #666;
   margin-top: 4px;
 }
+
+/* --- Botão de Excluir --- */
+.valores-acoes {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-excluir {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-excluir:hover {
+  background-color: #ffebee;
+  transform: scale(1.1);
+}

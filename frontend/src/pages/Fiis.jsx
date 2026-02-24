@@ -7,7 +7,6 @@ function Fiis() {
   const [preco, setPreco] = useState("");
   const [carteira, setCarteira] = useState([]);
 
-  // Busca a carteira salva no MySQL assim que a tela abre
   async function buscarCarteira() {
     try {
       const resposta = await fetch("http://127.0.0.1:8000/carteira");
@@ -22,7 +21,6 @@ function Fiis() {
     buscarCarteira();
   }, []);
 
-  // Envia a nova compra para o Python
   async function adicionarFii(event) {
     event.preventDefault();
 
@@ -44,12 +42,9 @@ function Fiis() {
           body: JSON.stringify(novaCompra),
         });
 
-        // Limpa os campos
         setFii("");
         setQuantidade("");
         setPreco("");
-
-        // Puxa a lista atualizada do banco
         buscarCarteira();
       } catch (erro) {
         console.error("Erro ao salvar FII:", erro);
@@ -57,7 +52,24 @@ function Fiis() {
     }
   }
 
-  // Calcula o patrimônio total somando o que veio do banco
+  // Pede para o Python deletar o FII pelo ID
+  async function excluirFii(id) {
+    const confirmar = window.confirm(
+      "Tem certeza que deseja apagar este fundo da sua carteira?",
+    );
+    if (confirmar) {
+      try {
+        await fetch(`http://127.0.0.1:8000/carteira/${id}`, {
+          method: "DELETE",
+        });
+        // Atualiza a lista na tela logo após apagar no banco
+        buscarCarteira();
+      } catch (erro) {
+        console.error("Erro ao excluir FII:", erro);
+      }
+    }
+  }
+
   const totalCarteira = carteira.reduce(
     (acumulador, item) => acumulador + parseFloat(item.total_investido),
     0,
@@ -139,13 +151,23 @@ function Fiis() {
                     <span className="desc fii-ticker">{item.ticker}</span>
                     <span className="fii-qtd">{item.quantidade} cotas</span>
                   </div>
-                  <div className="fii-valores">
-                    <span className="fii-pm">
-                      PM: R$ {parseFloat(item.preco_medio).toFixed(2)}
-                    </span>
-                    <span className="valor receita">
-                      R$ {parseFloat(item.total_investido).toFixed(2)}
-                    </span>
+                  {/* A lixeira agrupada com os valores para manter o alinhamento */}
+                  <div className="valores-acoes">
+                    <div className="fii-valores">
+                      <span className="fii-pm">
+                        PM: R$ {parseFloat(item.preco_medio).toFixed(2)}
+                      </span>
+                      <span className="valor receita">
+                        R$ {parseFloat(item.total_investido).toFixed(2)}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => excluirFii(item.id)}
+                      className="btn-excluir"
+                      title="Excluir Fundo"
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </li>
               ))}

@@ -119,3 +119,31 @@ def registrar_compra(compra: CompraFii):
   
   except Exception as e:
     raise HTTPException(status_code=500, detail=f"Erro ao registrar compra: {e}")
+
+@app.delete("/transacoes/{id_transacao}")
+def deletar_transacao(id_transacao: int):
+  if not conexao_banco or not conexao_banco.is_connected():
+    raise HTTPException(status_code=500, detail="Banco desconectado")
+  
+  try:
+    cursor = conexao_banco.cursor()
+    cursor.execute("DELETE FROM transacoes WHERE id = %s", (id_transacao,))
+    conexao_banco.commit()
+    cursor.close()
+    return {"mensagem": "Transação excluída com sucesso!"}
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Erro ao excluir transação: {e}")
+  
+@app.delete("/carteira/{id_fii}")
+def deletar_fii(id_fii: int):
+  if not conexao_banco or not conexao_banco.is_connected():
+    raise HTTPException(status_code=500, detail="Banco desconectado")
+  
+  try:
+    cursor = conexao_banco.cursor()
+    cursor.execute("DELETE FROM carteira WHERE id = %s", (id_fii,))
+    conexao_banco.commit()
+    cursor.close()
+    return {"mensagem": "FII excluído com sucesso!"}
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Erro ao excluir FII: {e}")

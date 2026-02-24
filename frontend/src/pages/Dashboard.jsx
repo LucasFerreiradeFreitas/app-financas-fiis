@@ -7,15 +7,11 @@ function Dashboard() {
   const [valor, setValor] = useState("");
   const [transacoes, setTransacoes] = useState([]);
 
-  // Função para buscar os dados do Python (GET)
   async function buscarTransacoes() {
     try {
       const resposta = await fetch("http://127.0.0.1:8000/transacoes");
       const dados = await resposta.json();
-
       setTransacoes(dados);
-
-      // Recalcula o saldo total somando tudo que veio do banco
       const saldoCalculado = dados.reduce(
         (acumulador, item) => acumulador + parseFloat(item.valor),
         0,
@@ -26,41 +22,45 @@ function Dashboard() {
     }
   }
 
-  // useEffect faz a busca rodar automaticamente quando a tela abre
   useEffect(() => {
     buscarTransacoes();
   }, []);
 
-  // Função para enviar uma nova transação para o Python (POST)
   async function adicionarTransacao(event) {
     event.preventDefault();
-
     const valorNumero = parseFloat(valor);
 
     if (!isNaN(valorNumero)) {
-      const novaTransacao = {
-        descricao: descricao,
-        valor: valorNumero,
-      };
-
+      const novaTransacao = { descricao: descricao, valor: valorNumero };
       try {
-        // Envia os dados para a API
         await fetch("http://127.0.0.1:8000/transacoes", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(novaTransacao),
         });
-
-        // Limpa os campos da tela
         setDescricao("");
         setValor("");
-
-        // Pede para o React buscar a lista atualizada no banco
         buscarTransacoes();
       } catch (erro) {
-        console.error("Erro ao salvar transação:", erro);
+        console.error("Erro ao salvar:", erro);
+      }
+    }
+  }
+
+  async function excluirTransacao(id) {
+    // Um pequeno aviso para evitar exclusões acidentais
+    const confirmar = window.confirm(
+      "Tem certeza que deseja apagar este registro?",
+    );
+    if (confirmar) {
+      try {
+        await fetch(`http://127.0.0.1:8000/transacoes/${id}`, {
+          method: "DELETE",
+        });
+        // Atualiza a lista na tela logo após apagar no banco
+        buscarTransacoes();
+      } catch (erro) {
+        console.error("Erro ao excluir:", erro);
       }
     }
   }
@@ -106,19 +106,28 @@ function Dashboard() {
             <p className="vazio">Nenhuma movimentação registrada ainda.</p>
           ) : (
             <ul className="lista-transacoes">
-              {/* Agora o React lê as transações direto do banco de dados! */}
               {transacoes.map((t) => (
                 <li key={t.id} className="item-transacao">
                   <span className="desc">{t.descricao}</span>
-                  <span
-                    className={
-                      parseFloat(t.valor) >= 0
-                        ? "valor receita"
-                        : "valor despesa"
-                    }
-                  >
-                    R$ {parseFloat(t.valor).toFixed(2)}
-                  </span>
+                  <div className="valores-acoes">
+                    <span
+                      className={
+                        parseFloat(t.valor) >= 0
+                          ? "valor receita"
+                          : "valor despesa"
+                      }
+                    >
+                      R$ {parseFloat(t.valor).toFixed(2)}
+                    </span>
+                    {/* O botão de excluir que passa o ID da transação */}
+                    <button
+                      onClick={() => excluirTransacao(t.id)}
+                      className="btn-excluir"
+                      title="Excluir registro"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
