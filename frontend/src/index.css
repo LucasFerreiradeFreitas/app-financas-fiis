@@ -12,41 +12,49 @@ body {
   color: #333;
 }
 
+/* ========================================= */
+/* --- LAYOUT GLOBAL (MEDIDAS RELATIVAS) --- */
+/* ========================================= */
 .container {
-  max-width: 800px;
-  margin: 50px auto;
-  padding: 0 20px;
+  width: 90%; /* Usa 90% da tela disponível, garantindo respiro nas laterais */
+  max-width: 1100px;
+  margin: 4vh auto; /* Margem ajustada pela altura da tela */
 }
 
 header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 4vh;
 }
 
+/* clamp() = O texto cresce e encolhe sozinho entre 1.8rem e 2.5rem dependendo da tela! */
 header h1 {
   color: #1a1a1a;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin-bottom: 1vh;
   letter-spacing: -0.5px;
 }
 
 header p {
   color: #666;
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
 
+/* ========================================= */
+/* --- BLOCO DE RESUMO (O PAINEL AZUL) --- */
+/* ========================================= */
 .resumo {
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   color: white;
-  padding: 35px;
-  border-radius: 16px;
+  padding: 4% 5%; /* Padding elástico */
+  border-radius: 1rem;
   box-shadow: 0 10px 20px rgba(42, 82, 152, 0.2);
-  margin-bottom: 30px;
+  margin-bottom: 4vh;
   text-align: center;
+  width: 100%;
 }
 
 .resumo h2 {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 400;
   opacity: 0.9;
   text-transform: uppercase;
@@ -54,36 +62,49 @@ header p {
 }
 
 .resumo p {
-  font-size: 2rem;
+  /* O pulo do gato: o texto do saldo diminui até 1.5rem no celular, e cresce até 2.5rem no PC */
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
   font-weight: 700;
-  margin-top: 10px;
+  margin-top: 2vh;
+  word-break: break-all; /* Evita que números milionários quebrem a tela */
 }
 
-.formulario {
+/* ========================================= */
+/* --- FORMULÁRIOS E CAIXAS BRANCAS --- */
+/* ========================================= */
+.formulario,
+.extrato {
   background-color: #fff;
-  padding: 30px;
-  border-radius: 16px;
+  padding: 4% 5%; /* Padding flexível */
+  border-radius: 1rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
 }
 
-.formulario h3 {
-  margin-bottom: 20px;
+.extrato {
+  margin-top: 4vh;
+}
+
+h3 {
+  margin-bottom: 3vh;
   color: #333;
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
 }
 
 form {
   display: flex;
+  flex-wrap: wrap; /* Se não couber, os inputs caem para a linha de baixo naturalmente */
   gap: 15px;
+  width: 100%;
 }
 
 input {
-  flex: 1;
-  padding: 15px;
+  flex: 1 1 200px; /* Ocupa o espaço disponível, mas não fica menor que 200px */
+  padding: 1rem;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  width: 100%;
 }
 
 input:focus {
@@ -93,156 +114,55 @@ input:focus {
 }
 
 button {
-  padding: 15px 30px;
+  padding: 1rem 1.5rem;
   background-color: #2e7d32;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   cursor: pointer;
   font-weight: 600;
   font-size: 1rem;
-  transition:
-    background-color 0.3s,
-    transform 0.1s;
+  transition: all 0.3s;
 }
 
 button:hover {
   background-color: #1b5e20;
 }
 
-button:active {
-  transform: scale(0.98);
-}
-
-.extrato {
-  margin-top: 30px;
-  background-color: #fff;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.extrato h3 {
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 1.3rem;
-}
-
-.vazio {
-  text-align: center;
-  color: #888;
-  font-style: italic;
-  padding: 20px 0;
-}
-
+/* ========================================= */
+/* --- LISTAS DE TRANSAÇÕES E FIIs --- */
+/* ========================================= */
 .lista-transacoes {
   list-style: none;
+  width: 100%;
 }
 
 .item-transacao {
   display: flex;
   justify-content: space-between;
-  padding: 15px 0;
-  margin-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  padding: 2.5% 0;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap; /* Permite que os valores desçam no mobile */
+  gap: 10px;
 }
 
 .item-transacao:last-child {
   border-bottom: none;
 }
 
-.item-transacao .desc {
-  font-weight: 600;
-  color: #555;
-}
-
-.item-transacao .valor {
-  font-weight: 700;
-}
-
 .receita {
   color: #2e7d32;
 }
-
 .despesa {
   color: #d32f2f;
-}
-
-.menu-navegacao {
-  background-color: #1a1a1a;
-  padding: 15px 0;
-  margin-bottom: 30px;
-}
-
-.menu-container {
-  max-width: 800px;
-  margin: 0 auto;
-  display: flex;
-  gap: 20px;
-  padding: 0 20px;
-}
-
-.link-menu {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 6px;
-  transition: background-color 0.3s;
-}
-
-.link-menu:hover {
-  background-color: #333;
-}
-
-.grid-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: left;
-}
-
-.input-group label {
-  font-weight: bold;
-  color: #555;
-  font-size: 0.9rem;
-}
-
-.input-group.destaque input {
-  border-color: #2e7d32;
-  background-color: #f1f8e9;
-}
-
-.btn-container {
-  display: flex;
-  align-items: flex-end;
-}
-
-.btn-comprar {
-  width: 100%;
-  height: 50px;
-}
-
-.carteira-lista .resumo-carteira {
-  background-color: #f1f8e9;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 25px;
-  text-align: center;
-  color: #2e7d32;
-  font-size: 1.2rem;
-  border: 1px solid #c5e1a5;
 }
 
 .fii-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .fii-info,
@@ -254,13 +174,12 @@ button:active {
 .fii-info {
   text-align: left;
 }
-
 .fii-valores {
   text-align: right;
 }
 
 .fii-ticker {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
   color: #1e3c72;
   font-weight: 700;
 }
@@ -272,7 +191,6 @@ button:active {
   margin-top: 4px;
 }
 
-/* --- Botão de Excluir --- */
 .valores-acoes {
   display: flex;
   align-items: center;
@@ -282,81 +200,129 @@ button:active {
 .btn-excluir {
   background: none;
   border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
+  color: #333;
   padding: 5px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .btn-excluir:hover {
-  background-color: #ffebee;
+  background-color: transparent;
   transform: scale(1.1);
 }
 
-/* --- Tela de Autenticação --- */
+/* ========================================= */
+/* --- TELA DE FIIs (LADO A LADO FLEXÍVEL) - */
+/* ========================================= */
+.painel-fiis {
+  display: flex;
+  flex-wrap: wrap; /* A quebra automática para celular acontece aqui */
+  gap: 3%;
+  width: 100%;
+  align-items: flex-start;
+  margin-top: 4vh;
+}
+
+.painel-fiis .formulario {
+  flex: 1 1 30%; /* Ocupa 30% da tela */
+  min-width: 280px; /* Mas nunca fica espremido demais */
+  position: sticky;
+  top: 4vh;
+}
+
+.grid-form-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+  width: 100%;
+}
+
+.painel-fiis .extrato {
+  flex: 2 1 65%; /* Ocupa os outros 65% da tela */
+  min-width: 300px;
+  margin-top: 0;
+}
+
+.resumo-carteira {
+  background-color: #f1f8e9;
+  padding: 3%;
+  border-radius: 0.5rem;
+  margin-bottom: 4vh;
+  text-align: center;
+  color: #2e7d32;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  border: 1px solid #c5e1a5;
+}
+
+.conteudo-carteira {
+  display: flex;
+  flex-wrap: wrap; /* O Gráfico e a Lista caem para a próxima linha se apertar */
+  align-items: center;
+  gap: 3%;
+  width: 100%;
+}
+
+.grafico-container {
+  flex: 1 1 45%;
+  min-width: 250px;
+  width: 100%;
+}
+
+.lista-fiis-lateral {
+  flex: 1 1 45%;
+  min-width: 250px;
+  margin-top: 0;
+}
+
+/* ========================================= */
+/* --- TELA DE AUTENTICAÇÃO --- */
+/* ========================================= */
 .auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #f4f7f6;
+  padding: 5%;
 }
 
 .auth-box {
   background-color: white;
-  padding: 40px;
-  border-radius: 12px;
+  padding: 8%;
+  border-radius: 1rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
 }
 
-.auth-box h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #2c3e50;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.auth-toggle {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 0.9rem;
-}
-
-.auth-toggle span {
-  color: #3498db;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.mensagem-alerta {
-  background-color: #e8f4fd;
-  color: #2980b9;
-  padding: 10px;
-  border-radius: 6px;
-  text-align: center;
-  margin-bottom: 15px;
-  font-size: 0.9rem;
-}
-
-/* --- Atualização do Menu --- */
+/* ========================================= */
+/* --- MENU DE NAVEGAÇÃO & HAMBÚRGUER --- */
+/* ========================================= */
 .menu-navegacao {
+  background-color: #2c3e50;
+  padding: 2vh 5%; /* Padding em % para se alinhar com o container */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
-  background-color: #2c3e50;
+  position: relative;
+  width: 100%;
+}
+
+.menu-hamburguer {
+  display: none; /* Escondido no PC */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.menu-itens {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
 }
 
 .menu-esq,
@@ -370,18 +336,55 @@ button:active {
   color: white;
   font-weight: bold;
 }
-
 .btn-sair {
   background-color: #e74c3c;
   color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
 }
 
-.btn-sair:hover {
-  background-color: #c0392b;
+/* REGRAS DO CELULAR / TABLET PEQUENO (< 768px) */
+@media (max-width: 768px) {
+  .menu-navegacao {
+    min-height: 8vh; /* Garante que o menu escuro não "suma" */
+  }
+
+  .menu-hamburguer {
+    display: block; /* Revela o botão no mobile */
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%); /* Centraliza verticalmente o ícone ☰ */
+    z-index: 10;
+  }
+
+  .menu-itens {
+    display: none; /* Esconde o menu por padrão */
+    flex-direction: column;
+    width: 100%;
+    margin-top: 6vh;
+    gap: 2vh;
+  }
+
+  .menu-itens.aberto {
+    display: flex;
+  }
+
+  .menu-esq,
+  .menu-dir {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .menu-esq button,
+  .menu-dir button {
+    width: 100%; /* Botões do menu preenchendo a tela toda */
+    padding: 3vh;
+  }
+
+  /* Ajusta a lista de finanças para não espremer lixeira contra valores */
+  .valores-acoes {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+  }
 }

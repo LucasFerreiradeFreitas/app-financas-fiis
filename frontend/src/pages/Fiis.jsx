@@ -1,4 +1,12 @@
 import { useState, useEffect } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import "../index.css";
 
 function Fiis() {
@@ -9,14 +17,22 @@ function Fiis() {
 
   const token = localStorage.getItem("token");
 
+  const CORES = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#8e44ad",
+    "#2ecc71",
+    "#e74c3c",
+  ];
+
   async function buscarCarteira() {
     try {
       const resposta = await fetch("http://127.0.0.1:8000/carteira", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (!resposta.ok) return;
-
       const dados = await resposta.json();
       setCarteira(dados);
     } catch (erro) {
@@ -62,7 +78,7 @@ function Fiis() {
 
   async function excluirFii(id) {
     const confirmar = window.confirm(
-      "Tem certeza que deseja apagar este fundo da sua carteira?",
+      "Tem certeza que deseja apagar este fundo?",
     );
     if (confirmar) {
       try {
@@ -82,16 +98,24 @@ function Fiis() {
     0,
   );
 
+  const dadosGrafico = carteira.map((item) => ({
+    name: item.ticker,
+    value: parseFloat(item.total_investido),
+  }));
+
   return (
     <div className="container">
       <header>
         <h1>Minha Carteira de FIIs</h1>
         <p>Registre suas compras e acompanhe seu patrimônio.</p>
       </header>
-      <main>
+
+      {/* NOVO: Essa é a caixa principal que vai colocar tudo lado a lado */}
+      <main className="painel-fiis">
+        {/* COLUNA ESQUERDA: Formulário */}
         <section className="formulario fiis-form">
           <h3>Registrar Nova Compra</h3>
-          <form className="grid-form" onSubmit={adicionarFii}>
+          <form className="grid-form-vertical" onSubmit={adicionarFii}>
             <div className="input-group">
               <label>Nome do FII</label>
               <input
@@ -114,7 +138,7 @@ function Fiis() {
               />
             </div>
             <div className="input-group">
-              <label>Preço Pago por Cota (R$)</label>
+              <label>Preço (R$)</label>
               <input
                 type="number"
                 step="0.01"
@@ -126,51 +150,80 @@ function Fiis() {
             </div>
             <div className="input-group btn-container">
               <button type="submit" className="btn-comprar">
-                Adicionar à Carteira
+                Comprar
               </button>
             </div>
           </form>
         </section>
+
+        {/* COLUNA DIREITA: Investimentos (Gráfico e Lista) */}
         <section className="extrato carteira-lista">
           <h3>Meus Investimentos</h3>
           <div className="resumo-carteira">
             <p>
-              Patrimônio Total Investido:{" "}
-              <strong>R$ {totalCarteira.toFixed(2)}</strong>
+              Patrimônio Total: <strong>R$ {totalCarteira.toFixed(2)}</strong>
             </p>
           </div>
+
           {carteira.length === 0 ? (
             <p className="vazio">
               Você ainda não possui cotas na sua carteira.
             </p>
           ) : (
-            <ul className="lista-transacoes">
-              {carteira.map((item) => (
-                <li key={item.id} className="item-transacao fii-item">
-                  <div className="fii-info">
-                    <span className="desc fii-ticker">{item.ticker}</span>
-                    <span className="fii-qtd">{item.quantidade} cotas</span>
-                  </div>
-                  <div className="valores-acoes">
-                    <div className="fii-valores">
-                      <span className="fii-pm">
-                        PM: R$ {parseFloat(item.preco_medio).toFixed(2)}
-                      </span>
-                      <span className="valor receita">
-                        R$ {parseFloat(item.total_investido).toFixed(2)}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => excluirFii(item.id)}
-                      className="btn-excluir"
-                      title="Excluir Fundo"
+            <div className="conteudo-carteira">
+              <div className="grafico-container">
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={dadosGrafico}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
                     >
-                      🗑️
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                      {dadosGrafico.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={CORES[index % CORES.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
+                    <Legend verticalAlign="bottom" height={36} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <ul className="lista-transacoes lista-fiis-lateral">
+                {carteira.map((item) => (
+                  <li key={item.id} className="item-transacao fii-item">
+                    <div className="fii-info">
+                      <span className="desc fii-ticker">{item.ticker}</span>
+                      <span className="fii-qtd">{item.quantidade} cotas</span>
+                    </div>
+                    <div className="valores-acoes">
+                      <div className="fii-valores">
+                        <span className="fii-pm">
+                          PM: R$ {parseFloat(item.preco_medio).toFixed(2)}
+                        </span>
+                        <span className="valor receita">
+                          R$ {parseFloat(item.total_investido).toFixed(2)}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => excluirFii(item.id)}
+                        className="btn-excluir"
+                        title="Excluir Fundo"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </section>
       </main>
