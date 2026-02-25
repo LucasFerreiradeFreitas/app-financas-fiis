@@ -7,9 +7,16 @@ function Fiis() {
   const [preco, setPreco] = useState("");
   const [carteira, setCarteira] = useState([]);
 
+  const token = localStorage.getItem("token");
+
   async function buscarCarteira() {
     try {
-      const resposta = await fetch("http://127.0.0.1:8000/carteira");
+      const resposta = await fetch("http://127.0.0.1:8000/carteira", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!resposta.ok) return;
+
       const dados = await resposta.json();
       setCarteira(dados);
     } catch (erro) {
@@ -23,7 +30,6 @@ function Fiis() {
 
   async function adicionarFii(event) {
     event.preventDefault();
-
     const novaCompra = {
       ticker: fii,
       quantidade: parseInt(quantidade),
@@ -38,10 +44,12 @@ function Fiis() {
       try {
         await fetch("http://127.0.0.1:8000/carteira", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(novaCompra),
         });
-
         setFii("");
         setQuantidade("");
         setPreco("");
@@ -52,7 +60,6 @@ function Fiis() {
     }
   }
 
-  // Pede para o Python deletar o FII pelo ID
   async function excluirFii(id) {
     const confirmar = window.confirm(
       "Tem certeza que deseja apagar este fundo da sua carteira?",
@@ -61,8 +68,8 @@ function Fiis() {
       try {
         await fetch(`http://127.0.0.1:8000/carteira/${id}`, {
           method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
         });
-        // Atualiza a lista na tela logo após apagar no banco
         buscarCarteira();
       } catch (erro) {
         console.error("Erro ao excluir FII:", erro);
@@ -81,7 +88,6 @@ function Fiis() {
         <h1>Minha Carteira de FIIs</h1>
         <p>Registre suas compras e acompanhe seu patrimônio.</p>
       </header>
-
       <main>
         <section className="formulario fiis-form">
           <h3>Registrar Nova Compra</h3>
@@ -96,7 +102,6 @@ function Fiis() {
                 required
               />
             </div>
-
             <div className="input-group">
               <label>Quantidade de Cotas</label>
               <input
@@ -108,7 +113,6 @@ function Fiis() {
                 required
               />
             </div>
-
             <div className="input-group">
               <label>Preço Pago por Cota (R$)</label>
               <input
@@ -120,7 +124,6 @@ function Fiis() {
                 required
               />
             </div>
-
             <div className="input-group btn-container">
               <button type="submit" className="btn-comprar">
                 Adicionar à Carteira
@@ -128,17 +131,14 @@ function Fiis() {
             </div>
           </form>
         </section>
-
         <section className="extrato carteira-lista">
           <h3>Meus Investimentos</h3>
-
           <div className="resumo-carteira">
             <p>
               Patrimônio Total Investido:{" "}
               <strong>R$ {totalCarteira.toFixed(2)}</strong>
             </p>
           </div>
-
           {carteira.length === 0 ? (
             <p className="vazio">
               Você ainda não possui cotas na sua carteira.
@@ -151,7 +151,6 @@ function Fiis() {
                     <span className="desc fii-ticker">{item.ticker}</span>
                     <span className="fii-qtd">{item.quantidade} cotas</span>
                   </div>
-                  {/* A lixeira agrupada com os valores para manter o alinhamento */}
                   <div className="valores-acoes">
                     <div className="fii-valores">
                       <span className="fii-pm">

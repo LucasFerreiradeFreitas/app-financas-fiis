@@ -1,27 +1,59 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import Fiis from "./pages/Fiis";
+import Auth from "./pages/Auth"; // Importando a nova tela!
 import "./index.css";
 
 function App() {
+  const [abaAtiva, setAbaAtiva] = useState("extrato");
+
+  // O React procura o crachá no navegador assim que a tela abre
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const nomeUsuario = localStorage.getItem("nome_usuario");
+
+  // Função para rasgar o crachá e sair do sistema
+  function fazerLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("nome_usuario");
+    setToken(null);
+  }
+
+  // O GUARDIÃO: Se não tem crachá, mostra SOMENTE a tela de Login
+  if (!token) {
+    return <Auth onLogin={setToken} />;
+  }
+
+  // Se tem crachá, mostra o aplicativo completo!
   return (
-    <BrowserRouter>
+    <div>
       <nav className="menu-navegacao">
-        <div className="menu-container">
-          <Link to="/" className="link-menu">
-            Orçamento Mensal
-          </Link>
-          <Link to="/fiis" className="link-menu">
-            Projeção de FIIs
-          </Link>
+        <div className="menu-esq">
+          <button
+            className={abaAtiva === "extrato" ? "ativo" : ""}
+            onClick={() => setAbaAtiva("extrato")}
+          >
+            📊 Orçamento Mensal
+          </button>
+          <button
+            className={abaAtiva === "carteira" ? "ativo" : ""}
+            onClick={() => setAbaAtiva("carteira")}
+          >
+            🏢 Carteira de FIIs
+          </button>
+        </div>
+
+        <div className="menu-dir">
+          <span className="saudacao">Olá, {nomeUsuario}!</span>
+          <button onClick={fazerLogout} className="btn-sair">
+            Sair 🚪
+          </button>
         </div>
       </nav>
 
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/fiis" element={<Fiis />} />
-      </Routes>
-    </BrowserRouter>
+      {/* Mostra a tela correta dependendo do botão clicado */}
+      {abaAtiva === "extrato" && <Dashboard />}
+      {abaAtiva === "carteira" && <Fiis />}
+    </div>
   );
 }
 

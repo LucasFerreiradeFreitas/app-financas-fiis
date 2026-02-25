@@ -7,9 +7,18 @@ function Dashboard() {
   const [valor, setValor] = useState("");
   const [transacoes, setTransacoes] = useState([]);
 
+  // Pega o crachá salvo no navegador
+  const token = localStorage.getItem("token");
+
   async function buscarTransacoes() {
     try {
-      const resposta = await fetch("http://127.0.0.1:8000/transacoes");
+      const resposta = await fetch("http://127.0.0.1:8000/transacoes", {
+        headers: { Authorization: `Bearer ${token}` }, 
+      });
+
+      // Se o segurança barrar, a gente não tenta fazer matemática e evita a tela branca
+      if (!resposta.ok) return;
+
       const dados = await resposta.json();
       setTransacoes(dados);
       const saldoCalculado = dados.reduce(
@@ -35,7 +44,10 @@ function Dashboard() {
       try {
         await fetch("http://127.0.0.1:8000/transacoes", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(novaTransacao),
         });
         setDescricao("");
@@ -48,7 +60,6 @@ function Dashboard() {
   }
 
   async function excluirTransacao(id) {
-    // Um pequeno aviso para evitar exclusões acidentais
     const confirmar = window.confirm(
       "Tem certeza que deseja apagar este registro?",
     );
@@ -56,8 +67,8 @@ function Dashboard() {
       try {
         await fetch(`http://127.0.0.1:8000/transacoes/${id}`, {
           method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
         });
-        // Atualiza a lista na tela logo após apagar no banco
         buscarTransacoes();
       } catch (erro) {
         console.error("Erro ao excluir:", erro);
@@ -71,13 +82,11 @@ function Dashboard() {
         <h1>Meu App Financeiro</h1>
         <p>Controle seu orçamento do dia a dia.</p>
       </header>
-
       <main>
         <section className="resumo">
           <h2>Resumo do Mês</h2>
           <p>Saldo livre: R$ {saldo.toFixed(2)}</p>
         </section>
-
         <section className="formulario">
           <h3>Nova Movimentação</h3>
           <form onSubmit={adicionarTransacao}>
@@ -99,7 +108,6 @@ function Dashboard() {
             <button type="submit">Adicionar</button>
           </form>
         </section>
-
         <section className="extrato">
           <h3>Extrato de Movimentações</h3>
           {transacoes.length === 0 ? (
@@ -119,7 +127,6 @@ function Dashboard() {
                     >
                       R$ {parseFloat(t.valor).toFixed(2)}
                     </span>
-                    {/* O botão de excluir que passa o ID da transação */}
                     <button
                       onClick={() => excluirTransacao(t.id)}
                       className="btn-excluir"
