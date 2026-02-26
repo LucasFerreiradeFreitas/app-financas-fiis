@@ -281,17 +281,101 @@ button:hover {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f4f7f6;
+  background-color: #f0f2f5;
   padding: 5%;
 }
 
 .auth-box {
   background-color: white;
-  padding: 8%;
+  padding: 40px;
   border-radius: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   width: 100%;
-  max-width: 400px;
+  max-width: 400px; /* Levemente menor para ficar mais compacto */
+}
+
+.auth-box h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #1e3c72;
+  font-size: 1.6rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espaço menor entre os campos */
+}
+
+.auth-form .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.auth-form label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+  margin-left: 2px;
+}
+
+/* INPUTS MAIS DELICADOS */
+.auth-form input {
+  padding: 10px 12px; /* Altura reduzida para ficar elegante */
+  font-size: 0.95rem;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  flex: none;
+  width: 100%;
+  background-color: #fff;
+  transition: all 0.2s;
+}
+
+.auth-form input:focus {
+  border-color: #1e3c72;
+  box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+  outline: none;
+}
+
+.auth-form button {
+  margin-top: 15px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  font-size: 1rem;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(42, 82, 152, 0.2);
+}
+
+.auth-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(42, 82, 152, 0.3);
+}
+
+.auth-toggle {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.auth-toggle span {
+  color: #2a5298;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.mensagem-alerta {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid #ffcdd2;
 }
 
 /* ========================================= */
@@ -299,7 +383,7 @@ button:hover {
 /* ========================================= */
 .menu-navegacao {
   background-color: #2c3e50;
-  padding: 2vh 5%; /* Padding em % para se alinhar com o container */
+  padding: 15px 5%; /* Trocado para px para manter a altura estável */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -309,12 +393,13 @@ button:hover {
 
 .menu-hamburguer {
   display: none; /* Escondido no PC */
-  background: none;
+  background-color: transparent !important; /* MATA o fundo verde global */
   border: none;
   color: white;
-  font-size: 2rem;
+  font-size: 2.2rem;
   cursor: pointer;
-  padding: 0;
+  padding: 0 !important; /* MATA o tamanho gigante herdado */
+  line-height: 1;
 }
 
 .menu-itens {
@@ -343,25 +428,31 @@ button:hover {
 
 /* REGRAS DO CELULAR / TABLET PEQUENO (< 768px) */
 @media (max-width: 768px) {
+  .painel-fiis .formulario {
+    position: static;
+    width: 100%; /* Garante que ocupe a largura toda */
+    z-index: 1; /* Garante a ordem correta das camadas */
+  }
+
   .menu-navegacao {
-    min-height: 8vh; /* Garante que o menu escuro não "suma" */
+    min-height: 70px; /* Garante que a barra azul tenha uma altura digna */
   }
 
   .menu-hamburguer {
-    display: block; /* Revela o botão no mobile */
+    display: block;
     position: absolute;
     right: 5%;
-    top: 50%;
-    transform: translateY(-50%); /* Centraliza verticalmente o ícone ☰ */
+    top: 15px; /* Trava o ícone perfeitamente dentro da barra azul */
+    transform: none;
     z-index: 10;
   }
 
   .menu-itens {
-    display: none; /* Esconde o menu por padrão */
+    display: none;
     flex-direction: column;
     width: 100%;
-    margin-top: 6vh;
-    gap: 2vh;
+    margin-top: 35px; /* Empurra os botões mais para baixo para ficarem longe do X */
+    gap: 15px;
   }
 
   .menu-itens.aberto {
@@ -376,11 +467,10 @@ button:hover {
 
   .menu-esq button,
   .menu-dir button {
-    width: 100%; /* Botões do menu preenchendo a tela toda */
-    padding: 3vh;
+    width: 100%;
+    padding: 20px;
   }
 
-  /* Ajusta a lista de finanças para não espremer lixeira contra valores */
   .valores-acoes {
     width: 100%;
     justify-content: space-between;
