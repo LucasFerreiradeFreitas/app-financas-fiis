@@ -4,12 +4,12 @@ import Fiis from "./pages/Fiis";
 import Auth from "./pages/Auth";
 import "./index.css";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   const [abaAtiva, setAbaAtiva] = useState("extrato");
-
-  // Estado que controla o menu no celular
   const [menuAberto, setMenuAberto] = useState(false);
-
   const [token, setToken] = useState(localStorage.getItem("token"));
   const nomeUsuario = localStorage.getItem("nome_usuario");
 
@@ -19,56 +19,62 @@ function App() {
     setToken(null);
   }
 
-  // Função para mudar de aba e fechar o menu automaticamente no celular
   function mudarAba(aba) {
     setAbaAtiva(aba);
     setMenuAberto(false);
   }
 
-  if (!token) {
-    return <Auth onLogin={setToken} />;
-  }
-
   return (
-    <div>
-      <nav className="menu-navegacao">
-        {/* O BOTÃO HAMBÚRGUER (Só aparece no celular via CSS) */}
-        <button
-          className="menu-hamburguer"
-          onClick={() => setMenuAberto(!menuAberto)}
-        >
-          {menuAberto ? "✖" : "☰"}
-        </button>
+    <>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        theme="colored"
+      />
 
-        {/* A CAIXA QUE GUARDA OS BOTÕES */}
-        <div className={`menu-itens ${menuAberto ? "aberto" : ""}`}>
-          <div className="menu-esq">
+      {/* 2. Lógica de exibição: Se NÃO tem token, mostra o Auth. Se TEM token, mostra o painel. */}
+      {!token ? (
+        <Auth onLogin={setToken} />
+      ) : (
+        <div>
+          <nav className="menu-navegacao">
             <button
-              className={abaAtiva === "extrato" ? "ativo" : ""}
-              onClick={() => mudarAba("extrato")}
+              className="menu-hamburguer"
+              onClick={() => setMenuAberto(!menuAberto)}
             >
-              📊 Orçamento Mensal
+              {menuAberto ? "✖" : "☰"}
             </button>
-            <button
-              className={abaAtiva === "carteira" ? "ativo" : ""}
-              onClick={() => mudarAba("carteira")}
-            >
-              🏢 Carteira de FIIs
-            </button>
-          </div>
 
-          <div className="menu-dir">
-            <span className="saudacao">Olá, {nomeUsuario}!</span>
-            <button onClick={fazerLogout} className="btn-sair">
-              Sair 🚪
-            </button>
-          </div>
+            <div className={`menu-itens ${menuAberto ? "aberto" : ""}`}>
+              <div className="menu-esq">
+                <button
+                  className={abaAtiva === "extrato" ? "ativo" : ""}
+                  onClick={() => mudarAba("extrato")}
+                >
+                  📊 Orçamento Mensal
+                </button>
+                <button
+                  className={abaAtiva === "carteira" ? "ativo" : ""}
+                  onClick={() => mudarAba("carteira")}
+                >
+                  🏢 Carteira de FIIs
+                </button>
+              </div>
+
+              <div className="menu-dir">
+                <span className="saudacao">Olá, {nomeUsuario}!</span>
+                <button onClick={fazerLogout} className="btn-sair">
+                  Sair 🚪
+                </button>
+              </div>
+            </div>
+          </nav>
+
+          {abaAtiva === "extrato" && <Dashboard />}
+          {abaAtiva === "carteira" && <Fiis />}
         </div>
-      </nav>
-
-      {abaAtiva === "extrato" && <Dashboard />}
-      {abaAtiva === "carteira" && <Fiis />}
-    </div>
+      )}
+    </>
   );
 }
 

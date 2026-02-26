@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import {
   PieChart,
   Pie,
@@ -70,8 +71,10 @@ function Fiis() {
         setQuantidade("");
         setPreco("");
         buscarCarteira();
+        toast.success("Nova compra de FII registrada!");
       } catch (erro) {
         console.error("Erro ao salvar FII:", erro);
+        toast.error("Erro ao registrar a compra.");
       }
     }
   }
@@ -87,8 +90,10 @@ function Fiis() {
           headers: { Authorization: `Bearer ${token}` },
         });
         buscarCarteira();
+        toast.info("Fundo removido da sua carteira.");
       } catch (erro) {
         console.error("Erro ao excluir FII:", erro);
+        toast.error("Erro ao excluir o fundo.");
       }
     }
   }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import "../index.css";
 
 function Auth({ onLogin }) {
@@ -36,18 +37,20 @@ function Auth({ onLogin }) {
           localStorage.setItem("token", dados.access_token);
           localStorage.setItem("nome_usuario", dados.nome);
           onLogin(dados.access_token); // Libera o acesso avisando o aplicativo
+
+          toast.success("Bem-vindo!");
         } else {
           // Se for Cadastro, avisa que deu certo e muda para a tela de Login
-          setMensagem("Conta criada com sucesso! Agora faça o login.");
+          toast.success("Conta criada com sucesso! Agora faça o login.");
           setIsLogin(true);
           setSenha(""); // Limpa a senha por segurança
         }
       } else {
         // Mostra o erro que o Python mandou (ex: "Senha incorreta")
-        setMensagem(dados.detail || "Erro na operação.");
+        toast.error(dados.detail || "Erro na operação.");
       }
     } catch (erro) {
-      setMensagem("Erro ao conectar com o servidor.");
+      toast.error("Erro ao conectar com o servidor.");
     }
   }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 // Importando as ferramentas do Gráfico de Barras
 import {
   BarChart,
@@ -62,8 +63,9 @@ function Dashboard() {
         setDescricao("");
         setValor("");
         buscarTransacoes();
+        toast.success("Transação registrada com sucesso!");
       } catch (erro) {
-        console.error("Erro ao salvar:", erro);
+        toast.error("Erro ao conectar com o servidor.");
       }
     }
   }
@@ -79,8 +81,9 @@ function Dashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
         buscarTransacoes();
+        toast.info("Transação excluída.");
       } catch (erro) {
-        console.error("Erro ao excluir:", erro);
+        toast.error("Erro ao excluir transação.");
       }
     }
   }
