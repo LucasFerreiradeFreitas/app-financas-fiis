@@ -38,6 +38,14 @@ class CompraFii(BaseModel):
     quantidade: int
     preco: float
 
+class CaixinhaCriar(BaseModel):
+    nome: str
+    meta_total: float = 0.0
+    meta_mensal: float
+
+class CaixinhaMovimentacao(BaseModel):
+    valor: float
+
 # ==========================================
 # O SEGURANÇA DA PORTA (Lê o Crachá)
 # ==========================================
@@ -170,3 +178,51 @@ def deletar_fii(id_fii: int, usuario_id: int = Depends(obter_usuario_logado)):
     conexao_banco.commit()
     cursor.close()
     return {"mensagem": "FII excluído!"}
+
+# ==========================================
+# ROTAS DAS CAIXINHAS
+# ==========================================
+@app.get("/caixinhas")
+def listar_caixinhas(usuario_id: int = Depends(obter_usuario_logado)):
+    cursor = conexao_banco.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM caixinhas WHERE usuario_id = %s ORDER BY id DESC", (usuario_id,))
+    resultados = cursor.fetchall()
+    cursor.close()
+    return resultados
+
+@app.post("/caixinhas")
+def criar_caixinha(caixinha: CaixinhaCriar, usuario_id: int = Depends(obter_usuario_logado)):
+    cursor = conexao_banco.cursor()
+    sql = "INSERT INTO caixinhas (nome, meta_total, meta_mensal, saldo, usuario_id) VALUES (%s, %s, %s, %s, %s)"
+    cursor.execute(sql, (caixinha.nome, caixinha.meta_total, caixinha.meta_mensal, 0.0, usuario_id))
+    conexao_banco.commit()
+    cursor.close()
+    return {"mensagem": "Caixinha criada com sucesso!"}
+
+@app.post("/caixinhas/{id_caixinha}/depositar")
+def movimentar_caixinha(id_caixinha: int, mov: CaixinhaMovimentacao, usuario_id: int = Depends(obter_usuario_logado)):
+    cursor = conexao_banco.cursor(dictionary=True)
+    
+    # 1. Verifica se a caixinha existe e pertence a este utilizador
+    cursor.execute("SELECT * FROM caixinhas WHERE id = %s AND usuario_id = %s", (id_caixinha, usuario_id))
+    caixinha = cursor.fetchone()
+    
+    if not caixinha:
+        cursor.close()
+        raise HTTPException(status_code=404, detail="Caixinha não encontrada")
+    
+    # 2. Atualiza o saldo dentro da caixinha
+    novo_saldo = float(caixinha['saldo']) + mov.valor
+    cursor.execute("UPDATE caixinhas SET saldo = %s WHERE id = %s", (novo_saldo, id_caixinha))
+    
+    # 3. Se guardou dinheiro, cria uma despesa no extrato. Se resgatou, cria uma receita.
+    descricao_transacao = f"Depósito Caixinha: {caixinha['nome']}" if mov.valor > 0 else f"Resgate Caixinha: {caixinha['nome']}"
+    # Invertemos o sinal matemático (ex: depositou +100 na caixinha, vira -100 no saldo livre)
+    valor_transacao = -mov.valor 
+    
+    cursor.execute("INSERT INTO transacoes (descricao, valor, usuario_id) VALUES (%s, %s, %s)", (descricao_transacao, valor_transacao, usuario_id))
+    
+    conexao_banco.commit()
+    cursor.close()
+    
+    return {"mensagem": "Movimentação realizada com sucesso!", "novo_saldo": novo_saldo}

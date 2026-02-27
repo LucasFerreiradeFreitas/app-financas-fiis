@@ -21,10 +21,7 @@ function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
   const itensNav = [
     { id: "dashboard", label: "Orçamento Mensal", icon: "📊" },
     { id: "fiis", label: "Carteira de FIIs", icon: "📈" },
-    // Fácil de adicionar novos itens aqui no futuro:
-    // { id: "acoes", label: "Ações", icon: "💹" },
-    // { id: "metas", label: "Metas", icon: "🎯" },
-    // { id: "relatorios", label: "Relatórios", icon: "📋" },
+    { id: "caixinhas", label: "Minhas Caixinhas", icon: "🎯" },
   ];
 
   return (

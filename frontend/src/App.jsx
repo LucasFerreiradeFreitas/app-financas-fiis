@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Fiis from "./pages/Fiis";
+import Caixinhas from "./pages/Caixinhas";
 import Sidebar from "./Sidebar";
 import "./index.css";
 
@@ -48,6 +49,7 @@ function App() {
       <main className="main-content">
         {paginaAtiva === "dashboard" && <Dashboard />}
         {paginaAtiva === "fiis" && <Fiis />}
+        {paginaAtiva === "caixinhas" && <Caixinhas />}
       </main>
 
       <ToastContainer position="top-right" autoClose={3000} />
