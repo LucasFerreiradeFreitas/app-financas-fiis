@@ -7,8 +7,6 @@ function Caixinhas() {
   const [nome, setNome] = useState("");
   const [metaTotal, setMetaTotal] = useState("");
   const [metaMensal, setMetaMensal] = useState("");
-
-  // Guardamos o valor que o usuário digita no input de cada caixinha separadamente
   const [valorDeposito, setValorDeposito] = useState({});
 
   const token = localStorage.getItem("token");
@@ -63,24 +61,33 @@ function Caixinhas() {
     }
   }
 
-  async function depositar(id, metaMensalCaixinha) {
-    const valor = parseFloat(valorDeposito[id]);
+  // NOVO: Função unificada para Guardar ou Resgatar
+  async function movimentarCaixinha(caixinha, tipo) {
+    const valorDigitado = parseFloat(valorDeposito[caixinha.id]);
 
-    if (!valor || isNaN(valor) || valor <= 0) {
-      toast.error("Digite um valor válido para guardar.");
+    if (!valorDigitado || isNaN(valorDigitado) || valorDigitado <= 0) {
+      toast.error("Digite um valor válido.");
       return;
     }
 
+    if (tipo === "resgatar" && valorDigitado > caixinha.saldo) {
+      toast.error("Saldo insuficiente na caixinha para esse resgate!");
+      return;
+    }
+
+    // Se for resgate, manda o número negativo para o back-end fazer a mágica
+    const valorFinal = tipo === "resgatar" ? -valorDigitado : valorDigitado;
+
     try {
       const resposta = await fetch(
-        `http://127.0.0.1:8000/caixinhas/${id}/depositar`,
+        `http://127.0.0.1:8000/caixinhas/${caixinha.id}/depositar`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ valor }),
+          body: JSON.stringify({ valor: valorFinal }),
         },
       );
 
@@ -88,28 +95,51 @@ function Caixinhas() {
         const dados = await resposta.json();
         const novoSaldo = dados.novo_saldo;
 
-        // =======================================================
-        // A MÁGICA DA NOTIFICAÇÃO INTELIGENTE AQUI!
-        // =======================================================
-        if (novoSaldo >= metaMensalCaixinha) {
-          toast.success(
-            `🎉 Parabéns! Você alcançou a meta mensal da caixinha!`,
-          );
+        if (tipo === "guardar") {
+          if (novoSaldo >= caixinha.meta_mensal) {
+            toast.success(`🎉 Parabéns! Você alcançou a meta da caixinha!`);
+          } else {
+            toast.success(
+              `Guardado! Faltam R$ ${(caixinha.meta_mensal - novoSaldo).toFixed(2)} para a meta.`,
+            );
+          }
         } else {
-          const falta = metaMensalCaixinha - novoSaldo;
-          toast.warning(
-            `Bom trabalho! Mas ainda faltam R$ ${falta.toFixed(2)} para a meta do mês.`,
+          toast.info(
+            `Resgate de R$ ${valorDigitado.toFixed(2)} devolvido ao seu extrato.`,
           );
         }
 
-        // Limpa o input específico dessa caixinha
-        setValorDeposito({ ...valorDeposito, [id]: "" });
+        setValorDeposito({ ...valorDeposito, [caixinha.id]: "" });
         buscarCaixinhas();
       } else {
         toast.error("Erro ao movimentar o dinheiro.");
       }
     } catch (erro) {
       toast.error("Erro de conexão.");
+    }
+  }
+
+  // NOVO: Função para excluir a caixinha
+  async function excluirCaixinha(id) {
+    const confirmar = window.confirm(
+      "Excluir esta caixinha? O saldo guardado nela voltará para sua conta principal.",
+    );
+    if (confirmar) {
+      try {
+        const resposta = await fetch(`http://127.0.0.1:8000/caixinhas/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (resposta.ok) {
+          toast.info("Caixinha excluída com sucesso.");
+          buscarCaixinhas();
+        } else {
+          toast.error("Erro ao excluir caixinha.");
+        }
+      } catch (erro) {
+        toast.error("Erro de conexão.");
+      }
     }
   }
 
@@ -125,7 +155,6 @@ function Caixinhas() {
       </header>
 
       <main className="painel-fiis">
-        {/* COLUNA ESQUERDA: Formulário Travado */}
         <section className="formulario">
           <h3>Nova Caixinha</h3>
           <form className="grid-form-vertical" onSubmit={criarCaixinha}>
@@ -164,7 +193,6 @@ function Caixinhas() {
           </form>
         </section>
 
-        {/* COLUNA DIREITA: Cartões das Caixinhas */}
         <section
           className="extrato"
           style={{
@@ -185,7 +213,6 @@ function Caixinhas() {
             </div>
           ) : (
             caixinhas.map((caixinha) => {
-              // Calcula a porcentagem para a barra de progresso (trava em 100% no máximo)
               const porcentagem =
                 Math.min((caixinha.saldo / caixinha.meta_mensal) * 100, 100) ||
                 0;
@@ -200,31 +227,42 @@ function Caixinhas() {
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "center",
+                      alignItems: "flex-start",
                       marginBottom: "15px",
                     }}
                   >
-                    <h4
-                      style={{
-                        fontSize: "1.2rem",
-                        color: "var(--brand-primary)",
-                        margin: 0,
-                      }}
+                    <div>
+                      <h4
+                        style={{
+                          fontSize: "1.2rem",
+                          color: "var(--brand-primary)",
+                          margin: 0,
+                        }}
+                      >
+                        🎯 {caixinha.nome}
+                      </h4>
+                      <div
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "1.4rem",
+                          color: "var(--color-receita)",
+                          marginTop: "5px",
+                        }}
+                      >
+                        R$ {parseFloat(caixinha.saldo).toFixed(2)}
+                      </div>
+                    </div>
+
+                    {/* Botão de Excluir */}
+                    <button
+                      onClick={() => excluirCaixinha(caixinha.id)}
+                      className="btn-excluir"
+                      title="Excluir Caixinha"
                     >
-                      🎯 {caixinha.nome}
-                    </h4>
-                    <span
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "1.4rem",
-                        color: "var(--color-receita)",
-                      }}
-                    >
-                      R$ {parseFloat(caixinha.saldo).toFixed(2)}
-                    </span>
+                      🗑️
+                    </button>
                   </div>
 
-                  {/* Barra de Progresso Visual */}
                   <div style={{ marginBottom: "15px" }}>
                     <div
                       style={{
@@ -264,43 +302,56 @@ function Caixinhas() {
                     </div>
                   </div>
 
-                  {/* Botão de Guardar Dinheiro */}
                   <div
-                    style={{ display: "flex", gap: "10px", marginTop: "20px" }}
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginTop: "20px",
+                      flexWrap: "wrap",
+                    }}
                   >
                     <input
                       type="number"
                       step="0.01"
-                      placeholder="R$ Valor para guardar"
+                      placeholder="R$ Valor"
                       value={valorDeposito[caixinha.id] || ""}
                       onChange={(e) =>
                         handleValorChange(caixinha.id, e.target.value)
                       }
-                      style={{ flex: "1" }}
+                      style={{ flex: "1", minWidth: "120px" }}
                     />
+
+                    {/* Botão Guardar */}
                     <button
-                      onClick={() =>
-                        depositar(caixinha.id, caixinha.meta_mensal)
-                      }
+                      onClick={() => movimentarCaixinha(caixinha, "guardar")}
                       style={{
-                        padding: "0 24px",
+                        padding: "0 20px",
                         backgroundColor: "var(--color-receita)",
                         color: "white",
                         border: "none",
                         borderRadius: "var(--radius-sm)",
                         cursor: "pointer",
                         fontWeight: "bold",
-                        transition: "0.2s",
-                        width: "auto",
                       }}
-                      onMouseOver={(e) =>
-                        (e.target.style.transform = "scale(1.02)")
-                      }
-                      onMouseOut={(e) =>
-                        (e.target.style.transform = "scale(1)")
-                      }
                     >
                       Guardar
+                    </button>
+
+                    {/* Botão Resgatar */}
+                    <button
+                      onClick={() => movimentarCaixinha(caixinha, "resgatar")}
+                      style={{
+                        padding: "10px 20px",
+                        backgroundColor: "transparent",
+                        color: "var(--brand-secondary)",
+                        border: "1.5px solid var(--brand-secondary)",
+                        borderRadius: "var(--radius-sm)",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        transition: "all var(--transition)",
+                      }}
+                    >
+                      Resgatar
                     </button>
                   </div>
                 </div>

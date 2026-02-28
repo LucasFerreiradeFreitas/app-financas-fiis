@@ -226,3 +226,27 @@ def movimentar_caixinha(id_caixinha: int, mov: CaixinhaMovimentacao, usuario_id:
     cursor.close()
     
     return {"mensagem": "Movimentação realizada com sucesso!", "novo_saldo": novo_saldo}
+
+@app.delete("/caixinhas/{id_caixinha}")
+def deletar_caixinha(id_caixinha: int, usuario_id: int = Depends(obter_usuario_logado)):
+    cursor = conexao_banco.cursor(dictionary=True)
+    
+    # 1. Busca a caixinha para ver se ela tem saldo
+    cursor.execute("SELECT * FROM caixinhas WHERE id = %s AND usuario_id = %s", (id_caixinha, usuario_id))
+    caixinha = cursor.fetchone()
+    
+    if not caixinha:
+        cursor.close()
+        raise HTTPException(status_code=404, detail="Caixinha não encontrada")
+    
+    # 2. Se tiver dinheiro, devolve para o extrato principal como receita
+    if float(caixinha['saldo']) > 0:
+        descricao = f"Resgate Automático (Caixinha Excluída: {caixinha['nome']})"
+        cursor.execute("INSERT INTO transacoes (descricao, valor, usuario_id) VALUES (%s, %s, %s)", (descricao, caixinha['saldo'], usuario_id))
+        
+    # 3. Deleta a caixinha
+    cursor.execute("DELETE FROM caixinhas WHERE id = %s", (id_caixinha,))
+    conexao_banco.commit()
+    cursor.close()
+    
+    return {"mensagem": "Caixinha excluída e saldo devolvido!"}
