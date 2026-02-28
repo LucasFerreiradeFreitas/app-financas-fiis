@@ -23,11 +23,14 @@ function Auth({ onLogin }) {
     const payload = isLogin ? { email, senha } : { nome, email, senha };
 
     try {
-      const resposta = await fetch(`http://127.0.0.1:8000${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const resposta = await fetch(
+        `https://app-financas-fiis.onrender.com${endpoint}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       const dados = await resposta.json();
 

@@ -23,9 +23,12 @@ function Dashboard() {
 
   async function buscarTransacoes() {
     try {
-      const resposta = await fetch("http://127.0.0.1:8000/transacoes", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const resposta = await fetch(
+        "https://app-financas-fiis.onrender.com/transacoes",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
       if (!resposta.ok) return;
 
@@ -52,7 +55,7 @@ function Dashboard() {
     if (!isNaN(valorNumero)) {
       const novaTransacao = { descricao: descricao, valor: valorNumero };
       try {
-        await fetch("http://127.0.0.1:8000/transacoes", {
+        await fetch("https://app-financas-fiis.onrender.com/transacoes", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -76,7 +79,7 @@ function Dashboard() {
     );
     if (confirmar) {
       try {
-        await fetch(`http://127.0.0.1:8000/transacoes/${id}`, {
+        await fetch(`https://app-financas-fiis.onrender.com/transacoes/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });

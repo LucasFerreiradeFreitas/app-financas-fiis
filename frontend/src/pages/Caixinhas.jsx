@@ -13,9 +13,12 @@ function Caixinhas() {
 
   async function buscarCaixinhas() {
     try {
-      const resposta = await fetch("http://127.0.0.1:8000/caixinhas", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const resposta = await fetch(
+        "https://app-financas-fiis.onrender.com/caixinhas",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (resposta.ok) {
         const dados = await resposta.json();
         setCaixinhas(dados);
@@ -38,14 +41,17 @@ function Caixinhas() {
     };
 
     try {
-      const resposta = await fetch("http://127.0.0.1:8000/caixinhas", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const resposta = await fetch(
+        "https://app-financas-fiis.onrender.com/caixinhas",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(novaCaixinha),
         },
-        body: JSON.stringify(novaCaixinha),
-      });
+      );
 
       if (resposta.ok) {
         toast.success("Caixinha criada com sucesso!");
@@ -80,7 +86,7 @@ function Caixinhas() {
 
     try {
       const resposta = await fetch(
-        `http://127.0.0.1:8000/caixinhas/${caixinha.id}/depositar`,
+        `https://app-financas-fiis.onrender.com/caixinhas/${caixinha.id}/depositar`,
         {
           method: "POST",
           headers: {
@@ -126,10 +132,13 @@ function Caixinhas() {
     );
     if (confirmar) {
       try {
-        const resposta = await fetch(`http://127.0.0.1:8000/caixinhas/${id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const resposta = await fetch(
+          `https://app-financas-fiis.onrender.com/caixinhas/${id}`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
 
         if (resposta.ok) {
           toast.info("Caixinha excluída com sucesso.");

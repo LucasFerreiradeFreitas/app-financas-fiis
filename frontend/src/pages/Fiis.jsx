@@ -30,9 +30,12 @@ function Fiis() {
 
   async function buscarCarteira() {
     try {
-      const resposta = await fetch("http://127.0.0.1:8000/carteira", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const resposta = await fetch(
+        "https://app-financas-fiis.onrender.com/carteira",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (!resposta.ok) return;
       const dados = await resposta.json();
       setCarteira(dados);
@@ -59,7 +62,7 @@ function Fiis() {
       novaCompra.ticker
     ) {
       try {
-        await fetch("http://127.0.0.1:8000/carteira", {
+        await fetch("https://app-financas-fiis.onrender.com/carteira", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -85,7 +88,7 @@ function Fiis() {
     );
     if (confirmar) {
       try {
-        await fetch(`http://127.0.0.1:8000/carteira/${id}`, {
+        await fetch(`https://app-financas-fiis.onrender.com/carteira/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
