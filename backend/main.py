@@ -2,8 +2,10 @@ from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import jwt
+import random 
 from conexao import obter_conexao
 from seguranca import gerar_hash_senha, verificar_senha, criar_token_acesso, CHAVE_SECRETA, ALGORITMO 
+from email_service import enviar_email_recuperacao
 
 app = FastAPI()
 
@@ -34,6 +36,16 @@ class UsuarioLogin(BaseModel):
     email: str
     senha: str
 
+# NOVO: Molde para pedir o código
+class EsqueciSenha(BaseModel):
+    email: str
+
+# NOVO: Molde para trocar a senha
+class RedefinirSenha(BaseModel):
+    email: str
+    codigo: str
+    nova_senha: str
+
 class Transacao(BaseModel):
     descricao: str
     valor: float
@@ -55,21 +67,19 @@ class CaixinhaMovimentacao(BaseModel):
 # O SEGURANÇA DA PORTA (Lê o Crachá)
 # ==========================================
 def obter_usuario_logado(authorization: str = Header(None)):
-    # 1. Verifica se a pessoa trouxe o crachá
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Acesso negado. Faça login para continuar.")
     
-    token = authorization.split(" ")[1] # Pega só o código maluco, tira a palavra "Bearer "
+    token = authorization.split(" ")[1] 
     
     try:
-        # 2. Desembaralha o crachá e pega o ID do usuário que está lá dentro
         payload = jwt.decode(token, CHAVE_SECRETA, algorithms=[ALGORITMO])
         return int(payload.get("sub"))
     except:
         raise HTTPException(status_code=401, detail="Crachá inválido ou expirado. Faça login novamente.")
 
 # ==========================================
-# ROTAS DE AUTENTICAÇÃO
+# ROTAS DE AUTENTICAÇÃO E RECUPERAÇÃO
 # ==========================================
 @app.post("/usuarios/cadastrar")
 def cadastrar_usuario(usuario: UsuarioCriar):
@@ -89,7 +99,6 @@ def cadastrar_usuario(usuario: UsuarioCriar):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ ERRO NO CADASTRO: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao cadastrar: {e}")
 
 @app.post("/usuarios/login")
@@ -112,13 +121,66 @@ def login_usuario(usuario: UsuarioLogin):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro no login: {e}")
 
+# Rota para pedir o e-mail de recuperação
+@app.post("/usuarios/esqueci-senha")
+def esqueci_senha(req: EsqueciSenha):
+    if not conexao_banco or not conexao_banco.is_connected():
+        raise HTTPException(status_code=500, detail="Banco desconectado")
+    
+    cursor = conexao_banco.cursor(dictionary=True)
+    cursor.execute("SELECT id FROM usuarios WHERE email = %s", (req.email,))
+    usuario = cursor.fetchone()
+
+    if not usuario:
+        cursor.close()
+        raise HTTPException(status_code=404, detail="E-mail não encontrado.")
+
+    # 1. Gera código de 6 dígitos aleatório
+    codigo = str(random.randint(100000, 999999))
+
+    # 2. Salva o código no banco de dados para esse usuário
+    cursor.execute("UPDATE usuarios SET codigo_recuperacao = %s WHERE email = %s", (codigo, req.email))
+    conexao_banco.commit()
+    cursor.close()
+
+    # 3. Manda o carteiro entregar a carta
+    sucesso = enviar_email_recuperacao(req.email, codigo)
+    if sucesso:
+        return {"mensagem": "Código de recuperação enviado para o seu e-mail!"}
+    else:
+        raise HTTPException(status_code=500, detail="Erro ao tentar enviar o e-mail.")
+
+# Rota para trocar a senha usando o código
+@app.post("/usuarios/redefinir-senha")
+def redefinir_senha(req: RedefinirSenha):
+    if not conexao_banco or not conexao_banco.is_connected():
+        raise HTTPException(status_code=500, detail="Banco desconectado")
+        
+    cursor = conexao_banco.cursor(dictionary=True)
+    # 1. Tenta achar o usuário que tenha esse email E esse código exato
+    cursor.execute("SELECT id FROM usuarios WHERE email = %s AND codigo_recuperacao = %s", (req.email, req.codigo))
+    usuario = cursor.fetchone()
+
+    if not usuario:
+        cursor.close()
+        raise HTTPException(status_code=400, detail="Código inválido ou e-mail incorreto.")
+
+    # 2. Se achou, criptografa a nova senha
+    senha_segura = gerar_hash_senha(req.nova_senha)
+    
+    # 3. Salva a senha nova e apaga o código de recuperação (para não ser usado de novo)
+    cursor.execute("UPDATE usuarios SET senha = %s, codigo_recuperacao = NULL WHERE email = %s", (senha_segura, req.email))
+    conexao_banco.commit()
+    cursor.close()
+
+    return {"mensagem": "Sua senha foi redefinida com sucesso! Você já pode fazer login."}
+
 # ==========================================
 # ROTAS DO EXTRATO 
 # ==========================================
 @app.get("/transacoes")
 def listar_transacoes(usuario_id: int = Depends(obter_usuario_logado)):
     cursor = conexao_banco.cursor(dictionary=True)
-    # Só busca as transações que pertencem a este usuário
     cursor.execute("SELECT * FROM transacoes WHERE usuario_id = %s ORDER BY id DESC", (usuario_id,))
     resultados = cursor.fetchall()
     cursor.close()
@@ -127,7 +189,6 @@ def listar_transacoes(usuario_id: int = Depends(obter_usuario_logado)):
 @app.post("/transacoes")
 def adicionar_transacao(transacao: Transacao, usuario_id: int = Depends(obter_usuario_logado)):
     cursor = conexao_banco.cursor()
-    # Salva a transação e carimba com o ID do usuário dono dela
     sql = "INSERT INTO transacoes (descricao, valor, usuario_id) VALUES (%s, %s, %s)"
     cursor.execute(sql, (transacao.descricao, transacao.valor, usuario_id))
     conexao_banco.commit() 
@@ -137,7 +198,6 @@ def adicionar_transacao(transacao: Transacao, usuario_id: int = Depends(obter_us
 @app.delete("/transacoes/{id_transacao}")
 def deletar_transacao(id_transacao: int, usuario_id: int = Depends(obter_usuario_logado)):
     cursor = conexao_banco.cursor()
-    # Garante que ele só pode apagar se o ID for dele
     cursor.execute("DELETE FROM transacoes WHERE id = %s AND usuario_id = %s", (id_transacao, usuario_id))
     conexao_banco.commit()
     cursor.close()
@@ -209,7 +269,6 @@ def criar_caixinha(caixinha: CaixinhaCriar, usuario_id: int = Depends(obter_usua
 def movimentar_caixinha(id_caixinha: int, mov: CaixinhaMovimentacao, usuario_id: int = Depends(obter_usuario_logado)):
     cursor = conexao_banco.cursor(dictionary=True)
     
-    # 1. Verifica se a caixinha existe e pertence a este utilizador
     cursor.execute("SELECT * FROM caixinhas WHERE id = %s AND usuario_id = %s", (id_caixinha, usuario_id))
     caixinha = cursor.fetchone()
     
@@ -217,13 +276,10 @@ def movimentar_caixinha(id_caixinha: int, mov: CaixinhaMovimentacao, usuario_id:
         cursor.close()
         raise HTTPException(status_code=404, detail="Caixinha não encontrada")
     
-    # 2. Atualiza o saldo dentro da caixinha
     novo_saldo = float(caixinha['saldo']) + mov.valor
     cursor.execute("UPDATE caixinhas SET saldo = %s WHERE id = %s", (novo_saldo, id_caixinha))
     
-    # 3. Se guardou dinheiro, cria uma despesa no extrato. Se resgatou, cria uma receita.
     descricao_transacao = f"Depósito Caixinha: {caixinha['nome']}" if mov.valor > 0 else f"Resgate Caixinha: {caixinha['nome']}"
-    # Invertemos o sinal matemático (ex: depositou +100 na caixinha, vira -100 no saldo livre)
     valor_transacao = -mov.valor 
     
     cursor.execute("INSERT INTO transacoes (descricao, valor, usuario_id) VALUES (%s, %s, %s)", (descricao_transacao, valor_transacao, usuario_id))
@@ -237,7 +293,6 @@ def movimentar_caixinha(id_caixinha: int, mov: CaixinhaMovimentacao, usuario_id:
 def deletar_caixinha(id_caixinha: int, usuario_id: int = Depends(obter_usuario_logado)):
     cursor = conexao_banco.cursor(dictionary=True)
     
-    # 1. Busca a caixinha para ver se ela tem saldo
     cursor.execute("SELECT * FROM caixinhas WHERE id = %s AND usuario_id = %s", (id_caixinha, usuario_id))
     caixinha = cursor.fetchone()
     
@@ -245,12 +300,10 @@ def deletar_caixinha(id_caixinha: int, usuario_id: int = Depends(obter_usuario_l
         cursor.close()
         raise HTTPException(status_code=404, detail="Caixinha não encontrada")
     
-    # 2. Se tiver dinheiro, devolve para o extrato principal como receita
     if float(caixinha['saldo']) > 0:
         descricao = f"Resgate Automático (Caixinha Excluída: {caixinha['nome']})"
         cursor.execute("INSERT INTO transacoes (descricao, valor, usuario_id) VALUES (%s, %s, %s)", (descricao, caixinha['saldo'], usuario_id))
         
-    # 3. Deleta a caixinha
     cursor.execute("DELETE FROM caixinhas WHERE id = %s", (id_caixinha,))
     conexao_banco.commit()
     cursor.close()
