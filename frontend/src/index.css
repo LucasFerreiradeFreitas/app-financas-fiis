@@ -899,3 +899,124 @@ button {
     align-items: flex-start;
   }
 }
+
+/* ========================================= */
+/* --- LANDING PAGE --- */
+/* ========================================= */
+.landing-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1e35 0%, #1e3a5f 50%, #1d4ed8 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.landing-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.landing-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-login-header {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-login-header:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-cadastro-header {
+  background: var(--brand-secondary);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cadastro-header:hover {
+  background: var(--brand-accent);
+}
+
+.landing-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.landing-hero h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+.landing-hero p {
+  font-size: 1.2rem;
+  color: #dbeafe;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.btn-hero {
+  background: var(--color-receita);
+  color: white;
+  font-size: 1.1rem;
+  padding: 16px 32px;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.4);
+  transition: all 0.2s;
+}
+
+.btn-hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(22, 163, 74, 0.6);
+}
+
+.btn-voltar {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: 20px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.btn-voltar:hover {
+  color: var(--text-primary);
+}

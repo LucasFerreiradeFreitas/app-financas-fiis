@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Fiis from "./pages/Fiis";
@@ -12,6 +13,10 @@ import "./index.css";
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [paginaAtiva, setPaginaAtiva] = useState("dashboard");
+
+  // Controla o que aparece quando o usuário NÃO está logado
+  const [viewDeslogado, setViewDeslogado] = useState("landing"); // 'landing', 'login' ou 'cadastro'
+
   const nomeUsuario = localStorage.getItem("nome_usuario") || "Usuário";
 
   function handleLogin(novoToken) {
@@ -23,13 +28,27 @@ function App() {
     localStorage.removeItem("token");
     localStorage.removeItem("nome_usuario");
     setToken(null);
+    setViewDeslogado("landing"); // Volta pra Landing ao sair
   }
 
-  // Se não autenticado, mostra tela de Auth sem sidebar
+  // Se não autenticado, gerencia as telas de fora do sistema
   if (!token) {
+    if (viewDeslogado === "landing") {
+      return (
+        <Landing
+          onEntrar={() => setViewDeslogado("login")}
+          onCadastrar={() => setViewDeslogado("cadastro")}
+        />
+      );
+    }
+
     return (
       <>
-        <Auth onLogin={handleLogin} />
+        <Auth
+          onLogin={handleLogin}
+          modoInicial={viewDeslogado === "login"}
+          onVoltar={() => setViewDeslogado("landing")}
+        />
         <ToastContainer position="top-right" autoClose={3000} />
       </>
     );
@@ -37,21 +56,17 @@ function App() {
 
   return (
     <div className="app-layout">
-      {/* SIDEBAR (inclui topbar mobile internamente) */}
       <Sidebar
         paginaAtiva={paginaAtiva}
         setPaginaAtiva={setPaginaAtiva}
         nomeUsuario={nomeUsuario}
         onLogout={handleLogout}
       />
-
-      {/* CONTEÚDO PRINCIPAL */}
       <main className="main-content">
         {paginaAtiva === "dashboard" && <Dashboard />}
         {paginaAtiva === "fiis" && <Fiis />}
         {paginaAtiva === "caixinhas" && <Caixinhas />}
       </main>
-
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
