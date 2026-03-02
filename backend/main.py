@@ -84,6 +84,7 @@ def cadastrar_usuario(usuario: UsuarioCriar):
     except HTTPException:
         raise
     except Exception as e:
+        print(f"❌ ERRO NO CADASTRO: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao cadastrar: {e}")
 
 @app.post("/usuarios/login")
