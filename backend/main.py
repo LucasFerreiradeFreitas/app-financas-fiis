@@ -15,6 +15,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def health_check():
+    return {"status": "API Finanças está online e acordada!"}
+
 conexao_banco = obter_conexao()
 
 # ==========================================
