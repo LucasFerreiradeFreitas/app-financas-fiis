@@ -12,7 +12,8 @@ def obter_conexao():
             database=os.getenv("DB_NAME"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
-            port=os.getenv("DB_PORT")
+            port=os.getenv("DB_PORT"),
+            ssl_ca="ca.pem"
         )
         return conexao
     except Exception as e:
