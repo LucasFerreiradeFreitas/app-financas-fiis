@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "../index.css";
 
-function Auth({ onLogin }) {
-  // Estado para controlar se estamos na tela de Login ou de Cadastro
-  const [isLogin, setIsLogin] = useState(true);
+function Auth({ onLogin, modoInicial, onVoltar }) {
+  const [isLogin, setIsLogin] = useState(modoInicial);
+
+  useEffect(() => {
+    setIsLogin(modoInicial);
+  }, [modoInicial]);
 
   // Estados para guardar o que a pessoa digita
   const [nome, setNome] = useState("");
@@ -60,6 +63,9 @@ function Auth({ onLogin }) {
   return (
     <div className="auth-container">
       <div className="auth-box">
+        <button type="button" className="btn-voltar" onClick={onVoltar}>
+          ⬅ Voltar ao início
+        </button>
         <h2>{isLogin ? "Entrar no Sistema" : "Criar Nova Conta"}</h2>
 
         {mensagem && <div className="mensagem-alerta">{mensagem}</div>}
