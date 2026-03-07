@@ -51,6 +51,7 @@ class RedefinirSenha(BaseModel):
 class Transacao(BaseModel):
     descricao: str
     valor: float
+    data: str
 
 class CompraFii(BaseModel):
     ticker: str
@@ -191,8 +192,8 @@ def listar_transacoes(usuario_id: int = Depends(obter_usuario_logado)):
 @app.post("/transacoes")
 def adicionar_transacao(transacao: Transacao, usuario_id: int = Depends(obter_usuario_logado)):
     cursor = conexao_banco.cursor()
-    sql = "INSERT INTO transacoes (descricao, valor, usuario_id) VALUES (%s, %s, %s)"
-    cursor.execute(sql, (transacao.descricao, transacao.valor, usuario_id))
+    sql = "INSERT INTO transacoes (descricao, valor, data, usuario_id) VALUES (%s, %s, %s, %s)"
+    cursor.execute(sql, (transacao.descricao, transacao.valor, transacao.data, usuario_id))
     conexao_banco.commit() 
     cursor.close()
     return {"mensagem": "Transação registrada."}
