@@ -1510,3 +1510,53 @@ button {
     text-align: center;
   }
 }
+
+/* ========================================= */
+/* --- MODO ESCURO (DARK MODE) --- */
+/* ========================================= */
+body.dark {
+  /* Mudamos os fundos para tons de azul muito escuro */
+  --bg-app: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-alt: #0f172a;
+
+  /* Mudamos os textos para ficarem claros */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+
+  /* Bordas mais subtis para o fundo escuro */
+  --border: #334155;
+}
+
+/* Correções para elementos que tinham fundo branco fixo */
+body.dark .auth-box {
+  background-color: var(--bg-card);
+}
+
+body.dark .grafico-container {
+  background-color: var(--bg-card-alt) !important;
+}
+
+/* O botão de alternar tema na Sidebar */
+.btn-tema {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--sidebar-text-active);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+.btn-tema:hover {
+  background: rgba(255, 255, 255, 0.15);
+}

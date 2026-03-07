@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -13,12 +13,33 @@ import "./index.css";
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [paginaAtiva, setPaginaAtiva] = useState("dashboard");
-
-  // Controla o que aparece quando o usuário NÃO está logado
-  const [viewDeslogado, setViewDeslogado] = useState("landing"); // 'landing', 'login' ou 'cadastro'
-
+  const [viewDeslogado, setViewDeslogado] = useState("landing");
   const nomeUsuario = localStorage.getItem("nome_usuario") || "Usuário";
 
+  // ==========================================
+  // MODO ESCURO (MEMÓRIA)
+  // ==========================================
+  const [temaEscuro, setTemaEscuro] = useState(() => {
+    return localStorage.getItem("tema") === "dark";
+  });
+
+  useEffect(() => {
+    if (temaEscuro) {
+      document.body.classList.add("dark");
+      localStorage.setItem("tema", "dark");
+    } else {
+      document.body.classList.remove("dark");
+      localStorage.setItem("tema", "light");
+    }
+  }, [temaEscuro]);
+
+  function alternarTema() {
+    setTemaEscuro(!temaEscuro);
+  }
+
+  // ==========================================
+  // FUNÇÕES DE LOGIN/LOGOUT
+  // ==========================================
   function handleLogin(novoToken) {
     setToken(novoToken);
     setPaginaAtiva("dashboard");
@@ -28,10 +49,9 @@ function App() {
     localStorage.removeItem("token");
     localStorage.removeItem("nome_usuario");
     setToken(null);
-    setViewDeslogado("landing"); // Volta pra Landing ao sair
+    setViewDeslogado("landing");
   }
 
-  // Se não autenticado, gerencia as telas de fora do sistema
   if (!token) {
     if (viewDeslogado === "landing") {
       return (
@@ -61,6 +81,8 @@ function App() {
         setPaginaAtiva={setPaginaAtiva}
         nomeUsuario={nomeUsuario}
         onLogout={handleLogout}
+        temaEscuro={temaEscuro} 
+        alternarTema={alternarTema} 
       />
       <main className="main-content">
         {paginaAtiva === "dashboard" && <Dashboard />}

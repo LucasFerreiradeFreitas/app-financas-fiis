@@ -1,9 +1,15 @@
 import { useState } from "react";
 
-function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
+function Sidebar({
+  paginaAtiva,
+  setPaginaAtiva,
+  nomeUsuario,
+  onLogout,
+  temaEscuro,
+  alternarTema,
+}) {
   const [aberta, setAberta] = useState(false);
 
-  // Pega as iniciais do nome para o avatar
   const iniciais = nomeUsuario
     ? nomeUsuario
         .split(" ")
@@ -15,7 +21,7 @@ function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
 
   function navegar(pagina) {
     setPaginaAtiva(pagina);
-    setAberta(false); // Fecha o drawer ao navegar no mobile
+    setAberta(false);
   }
 
   const itensNav = [
@@ -26,7 +32,6 @@ function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
 
   return (
     <>
-      {/* === TOPBAR MOBILE === */}
       <div className="topbar-mobile">
         <div className="topbar-logo">
           <div className="logo-icon">💰</div>
@@ -41,15 +46,12 @@ function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
         </button>
       </div>
 
-      {/* === OVERLAY (clica fora para fechar) === */}
       <div
         className={`sidebar-overlay ${aberta ? "visivel" : ""}`}
         onClick={() => setAberta(false)}
       />
 
-      {/* === SIDEBAR === */}
       <aside className={`sidebar ${aberta ? "aberta" : ""}`}>
-        {/* Logo */}
         <div className="sidebar-logo">
           <div className="logo-icon">💰</div>
           <div>
@@ -58,7 +60,6 @@ function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
           </div>
         </div>
 
-        {/* Navegação principal */}
         <div className="sidebar-section">
           <div className="sidebar-section-label">Menu</div>
           <nav className="sidebar-nav">
@@ -75,7 +76,6 @@ function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
           </nav>
         </div>
 
-        {/* Rodapé com usuário e botão sair */}
         <div className="sidebar-footer">
           <div className="sidebar-user">
             <div className="user-avatar">{iniciais}</div>
@@ -84,6 +84,12 @@ function Sidebar({ paginaAtiva, setPaginaAtiva, nomeUsuario, onLogout }) {
               <div className="user-role">Conta pessoal</div>
             </div>
           </div>
+
+          {/* O NOSSO NOVO BOTÃO DE MODO ESCURO VEM AQUI */}
+          <button className="btn-tema" onClick={alternarTema}>
+            <span>{temaEscuro ? "☀️" : "🌙"}</span>
+            {temaEscuro ? "Modo Claro" : "Modo Escuro"}
+          </button>
 
           <button className="btn-sair" onClick={onLogout}>
             <span>🚪</span>
