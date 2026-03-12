@@ -1515,20 +1515,16 @@ button {
 /* --- MODO ESCURO (DARK MODE) --- */
 /* ========================================= */
 body.dark {
-  /* Mudamos os fundos para tons de azul muito escuro */
   --bg-app: #0f172a;
   --bg-card: #1e293b;
   --bg-card-alt: #0f172a;
 
-  /* Mudamos os textos para ficarem claros */
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
 
-  /* Bordas mais subtis para o fundo escuro */
   --border: #334155;
 }
 
-/* Correções para elementos que tinham fundo branco fixo */
 body.dark .auth-box {
   background-color: var(--bg-card);
 }
@@ -1536,6 +1532,22 @@ body.dark .auth-box {
 body.dark .grafico-container {
   background-color: var(--bg-card-alt) !important;
 }
+
+/* === CORREÇÕES DA TELA DE LOGIN (NOVIDADE AQUI) === */
+body.dark .auth-box h2 {
+  color: var(--text-primary); /* Deixa o título claro */
+}
+
+body.dark .auth-form input {
+  background-color: var(--bg-app); /* Fundo do input escuro */
+  color: var(--text-primary); /* Texto do input claro */
+  border: 1px solid var(--border);
+}
+
+body.dark .auth-form input:focus {
+  border-color: var(--brand-accent); /* Brilho azul ao clicar */
+}
+/* ================================================== */
 
 /* O botão de alternar tema na Sidebar */
 .btn-tema {
