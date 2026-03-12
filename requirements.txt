@@ -9,8 +9,8 @@ colorama==0.4.6
 fastapi==0.132.0
 h11==0.16.0
 idna==3.11
-mysql-connector-python==9.6.0
 passlib==1.7.4
+psycopg2-binary==2.9.11
 pydantic==2.12.5
 pydantic_core==2.41.5
 PyJWT==2.11.0
